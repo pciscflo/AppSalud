@@ -1,7 +1,7 @@
 package com.eupc.appsalud;
 
 import com.eupc.appsalud.entidades.CentroSalud;
-import com.eupc.appsalud.entidades.CentroSaludResultado;
+import com.eupc.appsalud.dtos.CentroSaludDTO;
 import com.eupc.appsalud.negocio.NegocioCentroSalud;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
@@ -55,9 +55,9 @@ class AppSaludApplicationTests {
     }
     @Test
     public void probarReporteTotal(){
-        List<CentroSaludResultado> resultados ;
+        List<CentroSaludDTO> resultados ;
         resultados = negocioCentroSalud.obtenerReporteResultados();
-        for(CentroSaludResultado p:resultados){
+        for(CentroSaludDTO p:resultados){
             System.out.println(p.toString());
         }
         Assert.assertNotNull(resultados);

@@ -1,27 +1,28 @@
 package com.eupc.appsalud.negocio;
 
 import com.eupc.appsalud.entidades.CentroSalud;
-import com.eupc.appsalud.entidades.CentroSaludResultado;
+import com.eupc.appsalud.dtos.CentroSaludDTO;
 import com.eupc.appsalud.repositorio.RepositorioCentroSalud;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class NegocioCentroSalud {
     @Autowired
     private RepositorioCentroSalud repositorioCentroSalud;
 
-    public double calcularCalificacion(CentroSalud centroSalud) {
-        return (centroSalud.getCalificacionInfraestructura()*0.35 +
-                centroSalud.getCalificacionServicios()*0.65);
+    public double calcularCalificacion(CentroSaludDTO centroSaludDTO) {
+        return (centroSaludDTO.getCalificacionInfraestructura()*0.35 +
+                centroSaludDTO.getCalificacionServicios()*0.65);
     }
 
-    public String calcularResultadoFinal(CentroSalud centroSalud) {
-        if (calcularCalificacion(centroSalud) >= 80) {
+    public String calcularResultadoFinal(CentroSaludDTO centroSaludDTO) {
+        if (calcularCalificacion(centroSaludDTO) >= 80) {
             return "Aprobó";
         } else {
             return "Desaprobó";
@@ -29,7 +30,8 @@ public class NegocioCentroSalud {
     }
     public double calcularCalificacion(Long codigo){
        CentroSalud salud = repositorioCentroSalud.findById(codigo).get();
-       return calcularCalificacion(salud);
+       CentroSaludDTO centroSaludDTO = convertToDto(salud);
+       return calcularCalificacion(centroSaludDTO);
     }
     public CentroSalud registrar(CentroSalud centroSalud){
         CentroSalud salud = repositorioCentroSalud.save(centroSalud);
@@ -38,29 +40,36 @@ public class NegocioCentroSalud {
     }
     public String calcularResultadoFinal(Long codigo){
         CentroSalud salud = repositorioCentroSalud.findById(codigo).get();
-        return calcularResultadoFinal(salud);
+        CentroSaludDTO centroSaludDTO = convertToDto(salud);
+        return calcularResultadoFinal(centroSaludDTO);
     }
     public List<CentroSalud> obtenerReporte(){
         return repositorioCentroSalud.findAll();
     }
-    public List<CentroSaludResultado> obtenerReporteResultados(){
+    public List<CentroSaludDTO> obtenerReporteResultados(){
         List<CentroSalud> centros;
         centros = obtenerReporte();
-        List<CentroSaludResultado> centroSaludResultados= new ArrayList<>();
+        List<CentroSaludDTO> centroSaludDTOS;
+        centroSaludDTOS = convertToLisDto(centros);
 
-        for(CentroSalud p:centros){
-            CentroSaludResultado resultado = new CentroSaludResultado();
-            resultado.setCodigo(p.getCodigo());
-            resultado.setCalificacionInfraestructura(p.getCalificacionInfraestructura());
-            resultado.setCalificacionServicios(p.getCalificacionServicios());
-            resultado.setAmbulancias(p.isAmbulancias());
-            resultado.setTipo(p.getTipo());
-            resultado.setCalificacionFinal(calcularCalificacion(p));
-            centroSaludResultados.add(resultado);
+        for(CentroSaludDTO p:centroSaludDTOS){
+            p.setCalificacionFinal(calcularCalificacion(p));
+            centroSaludDTOS.add(p);
         }
-        return centroSaludResultados;
+        return centroSaludDTOS;
     }
     public CentroSalud obtenerCentro (Long codigo){
         return repositorioCentroSalud.findById(codigo).get();
+    }
+    private CentroSaludDTO convertToDto(CentroSalud centroSalud) {
+        ModelMapper modelMapper = new ModelMapper();
+        CentroSaludDTO centroSaludDTO = modelMapper.map(centroSalud, CentroSaludDTO.class);
+        return centroSaludDTO;
+    }
+
+    private List<CentroSaludDTO> convertToLisDto(List<CentroSalud> list){
+        return list.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
     }
 }
