@@ -29,22 +29,25 @@ public class NegocioCentroSalud {
         }
     }
     public double calcularCalificacion(Long codigo){
-       CentroSalud salud = repositorioCentroSalud.findById(codigo).get();
-       CentroSaludDTO centroSaludDTO = convertToDto(salud);
+       CentroSalud centroSalud = repositorioCentroSalud.findById(codigo).get();
+       CentroSaludDTO centroSaludDTO = convertToDto(centroSalud);
        return calcularCalificacion(centroSaludDTO);
     }
     public CentroSalud registrar(CentroSalud centroSalud){
         CentroSalud salud = repositorioCentroSalud.save(centroSalud);
-        //llamar a un correo
         return salud;
     }
     public String calcularResultadoFinal(Long codigo){
-        CentroSalud salud = repositorioCentroSalud.findById(codigo).get();
-        CentroSaludDTO centroSaludDTO = convertToDto(salud);
+        CentroSalud centroSalud = repositorioCentroSalud.findById(codigo).get();
+        CentroSaludDTO centroSaludDTO = convertToDto(centroSalud);
         return calcularResultadoFinal(centroSaludDTO);
     }
     public List<CentroSalud> obtenerReporte(){
         return repositorioCentroSalud.findAll();
+    }
+
+    public List<CentroSalud> obtenerReporte(String tipo){
+        return repositorioCentroSalud.findCentroSaludsByTipo(tipo);
     }
     public List<CentroSaludDTO> obtenerReporteResultados(){
         List<CentroSalud> centros;
@@ -54,12 +57,13 @@ public class NegocioCentroSalud {
 
         for(CentroSaludDTO p:centroSaludDTOS){
             p.setCalificacionFinal(calcularCalificacion(p));
-            centroSaludDTOS.add(p);
         }
         return centroSaludDTOS;
     }
-    public CentroSalud obtenerCentro (Long codigo){
-        return repositorioCentroSalud.findById(codigo).get();
+    public String obtenerCentroEvaluado (Long codigo){
+        CentroSalud centroSalud = repositorioCentroSalud.findById(codigo).get();
+        CentroSaludDTO centroSaludDTO = convertToDto(centroSalud);
+        return calcularResultadoFinal(centroSaludDTO);
     }
     private CentroSaludDTO convertToDto(CentroSalud centroSalud) {
         ModelMapper modelMapper = new ModelMapper();

@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public class RestCentroSalud {
     @Autowired
     private NegocioCentroSalud negocioCentroSalud;
-    @PostMapping("/centroSalud")
+    @PostMapping("/centroSalud")//1.-
     public CentroSaludDTO registrar(@RequestBody CentroSaludDTO centroSaludDTO){
         CentroSalud centroSalud;
         centroSalud = convertToEntity(centroSaludDTO);
@@ -25,25 +25,32 @@ public class RestCentroSalud {
         return convertToDto(centroSalud);
 
     }
-    @GetMapping("/centroSalud")
+    @GetMapping("/centroSalud")//2.-
     public List<CentroSaludDTO> obtenerReporte(){
         return convertToLisDto(negocioCentroSalud.obtenerReporte());
     }
+    @GetMapping("/centroSaludResultado") //3.-
+    public List<CentroSaludDTO> obtenerReporteResultados(){
+        return negocioCentroSalud.obtenerReporteResultados();
+    }
+
+    @GetMapping("/centroSaludTipo/{tipo}")
+    public List<CentroSalud> obtenerListadoCentrosTipo (@PathVariable(value = "tipo") String tipo){
+        return negocioCentroSalud.obtenerReporte(tipo);
+    }
+
     @GetMapping ("/centroSalud/{xCodigo}")
-    public CentroSaludDTO obtenerCentro (@PathVariable(value = "xCodigo") Long xCodigo)
+    public String obtenerEvaluacionCentro (@PathVariable(value = "xCodigo") Long xCodigo)
             throws Exception
     {
-        CentroSalud centroSalud;
+        String evaluado;
         try {
-            centroSalud = negocioCentroSalud.obtenerCentro(xCodigo);
+            evaluado = negocioCentroSalud.obtenerCentroEvaluado(xCodigo);
+
         } catch(Exception e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible encontrar su registro");
         }
-        return convertToDto(centroSalud);
-    }
-    @GetMapping("/centroSaludResultado")
-    public List<CentroSaludDTO> obtenerReporteResultados(){
-        return negocioCentroSalud.obtenerReporteResultados();
+        return evaluado;
     }
 
     private CentroSaludDTO convertToDto(CentroSalud centroSalud) {
