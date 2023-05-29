@@ -68,6 +68,7 @@ public class NegocioCentroSalud {
 
     public CentroSalud actualizar(Long codigo, CentroSalud centroSalud){
         CentroSalud centroAntiguo = repositorioCentroSalud.findById(codigo).get();
+        centroSalud.setCodigo(codigo);//verificado que existe
         return repositorioCentroSalud.save(centroSalud); //actualizando con el enviado
     }
     private CentroSaludDTO convertToDto(CentroSalud centroSalud) {
