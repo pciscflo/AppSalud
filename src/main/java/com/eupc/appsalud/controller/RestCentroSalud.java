@@ -6,6 +6,7 @@ import com.eupc.appsalud.negocio.NegocioCentroSalud;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -20,37 +21,63 @@ public class RestCentroSalud {
     @PostMapping("/centroSalud")//1.-
     public CentroSaludDTO registrar(@RequestBody CentroSaludDTO centroSaludDTO){
         CentroSalud centroSalud;
-        centroSalud = convertToEntity(centroSaludDTO);
-        centroSalud = negocioCentroSalud.registrar(centroSalud);
+        try {
+            centroSalud = convertToEntity(centroSaludDTO);
+            centroSalud = negocioCentroSalud.registrar(centroSalud);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible registrarlo");
+        }
         return convertToDto(centroSalud);
 
     }
     @GetMapping("/centroSalud")//2.-
-    public List<CentroSaludDTO> obtenerReporte(){
-        return convertToLisDto(negocioCentroSalud.obtenerReporte());
+    public ResponseEntity<List<CentroSaludDTO>> obtenerReporte(){
+        List<CentroSaludDTO> centroSaludDTOS;
+        try {
+            centroSaludDTOS = convertToLisDto(negocioCentroSalud.obtenerReporte());
+        }catch (Exception e)
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible obtener listado");
+        }
+        return new ResponseEntity<>(centroSaludDTOS, HttpStatus.OK);
     }
     @GetMapping("/centroSaludResultado") //3.-
     public List<CentroSaludDTO> obtenerReporteResultados(){
-        return negocioCentroSalud.obtenerReporteResultados();
+        List<CentroSaludDTO> centroSaludDTOS;
+        try {
+            centroSaludDTOS = negocioCentroSalud.obtenerReporteResultados();
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible obtener listado");
+        }
+        return centroSaludDTOS;
     }
 
     @GetMapping("/centroSaludTipo/{tipo}")
-    public List<CentroSalud> obtenerListadoCentrosTipo (@PathVariable(value = "tipo") String tipo){
-        return negocioCentroSalud.obtenerReporte(tipo);
+    public ResponseEntity<List<CentroSaludDTO>> obtenerListadoCentrosTipo (@PathVariable(value = "tipo") String tipo){
+        List<CentroSalud> centrosSalud;
+        List<CentroSaludDTO> centroSaludDTOS;
+        try {
+            centrosSalud = negocioCentroSalud.obtenerReporte(tipo);
+            centroSaludDTOS = convertToLisDto(centrosSalud);
+        }catch (Exception e)
+        {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible obtener listado");
+        }
+        return new ResponseEntity<>(centroSaludDTOS,HttpStatus.OK);
+
     }
 
     @GetMapping ("/centroSalud/{xCodigo}")
-    public String obtenerEvaluacionCentro (@PathVariable(value = "xCodigo") Long xCodigo)
+    public ResponseEntity<String> obtenerEvaluacionCentro (@PathVariable(value = "xCodigo") Long xCodigo)
             throws Exception
     {
         String evaluado;
         try {
             evaluado = negocioCentroSalud.obtenerCentroEvaluado(xCodigo);
-
         } catch(Exception e){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible encontrar su registro");
         }
-        return evaluado;
+        return new ResponseEntity<String>(evaluado, HttpStatus.OK);
     }
 
     private CentroSaludDTO convertToDto(CentroSalud centroSalud) {
