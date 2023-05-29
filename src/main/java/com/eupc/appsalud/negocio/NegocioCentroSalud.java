@@ -65,6 +65,11 @@ public class NegocioCentroSalud {
         CentroSaludDTO centroSaludDTO = convertToDto(centroSalud);
         return calcularResultadoFinal(centroSaludDTO);
     }
+
+    public CentroSalud actualizar(Long codigo, CentroSalud centroSalud){
+        CentroSalud centroAntiguo = repositorioCentroSalud.findById(codigo).get();
+        return repositorioCentroSalud.save(centroSalud); //actualizando con el enviado
+    }
     private CentroSaludDTO convertToDto(CentroSalud centroSalud) {
         ModelMapper modelMapper = new ModelMapper();
         CentroSaludDTO centroSaludDTO = modelMapper.map(centroSalud, CentroSaludDTO.class);

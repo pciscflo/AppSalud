@@ -52,7 +52,22 @@ public class RestCentroSalud {
         return centroSaludDTOS;
     }
 
-    @GetMapping("/centroSaludTipo/{tipo}")
+    @PutMapping("/centroSalud/{codigo}")
+    public ResponseEntity<CentroSaludDTO> actualizar(@PathVariable(value = "codigo") Long codigo,
+                                                     @RequestBody CentroSaludDTO centroSaludDTO){
+        CentroSalud centroSalud;
+        CentroSalud centroSaludActualizado;
+        try {
+            centroSalud = convertToEntity(centroSaludDTO);
+            centroSaludActualizado = negocioCentroSalud.actualizar(codigo, centroSalud);
+            centroSaludDTO = convertToDto(centroSaludActualizado);
+        }catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"No fue posible actualizar el centro de salud");
+        }
+        return  new ResponseEntity<CentroSaludDTO>(centroSaludDTO,HttpStatus.OK);
+    }
+
+    @GetMapping("/centroSaludTipo/{tipo}") // 4.-
     public ResponseEntity<List<CentroSaludDTO>> obtenerListadoCentrosTipo (@PathVariable(value = "tipo") String tipo){
         List<CentroSalud> centrosSalud;
         List<CentroSaludDTO> centroSaludDTOS;
